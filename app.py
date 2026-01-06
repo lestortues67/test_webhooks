@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 import hmac
 import hashlib
 import os
@@ -13,14 +13,9 @@ def verify_signature(payload, signature):
     expected_signature = 'sha256=' + mac.hexdigest()
     return hmac.compare_digest(expected_signature, signature)
 
-
-
 @app.route("/page")
 def mypage():
-    return render_template('page.html') 
-
-
-
+    return render_template('page.html')  # Assure-toi que page.html est dans un dossier /templates
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -28,9 +23,14 @@ def webhook():
     if signature is None or not verify_signature(request.data, signature):
         abort(400, "Signature invalide")
 
-    # Ici tu peux lancer un script qui pull les changements
-    os.system("cd /home/ton_username/ton_projet && git pull origin main")
+    # Pull automatique depuis GitHub
+    os.system("cd /home/bio220EU/test_webhooks && git pull origin main")
     return "OK", 200
+
+@app.route("/")
+def home():
+    return "<h1>Serveur en ligne !</h1>"
 
 if __name__ == "__main__":
     app.run()
+
